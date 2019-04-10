@@ -61,7 +61,7 @@ def main(repo_path, count=10):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument("-v", "--verbose", action="store_true", help="Show timings")
-    parser.add_argument("-c", "--count", default=10, help="Maximum files to return")
+    parser.add_argument("-c", "--count", default=10, type=int, metavar='N', help="Maximum files to return")
     parser.add_argument("repo", help="Path to target repository")
     args = parser.parse_args()
     verbose = args.verbose
