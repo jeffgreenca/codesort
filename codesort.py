@@ -7,15 +7,20 @@ import argparse
 import time
 import multi
 
-def iter_files_per_commit(r):
+def iter_files_per_commit(r, limit=None):
     """Iterate over lists of files per commit"""
 
     # TODO include all branches?
+    count = 0
     for commit in r.iter_commits():
+        count += 1
+        if limit is not None and count > limit:
+            return
         if not commit.parents:
             return
         file_list = r.git.diff("%s~1..%s" % (commit, commit), name_only=True)
         yield file_list.split("\n")
+
 
 def start(x):
     if verbose:
@@ -30,7 +35,7 @@ def _top_x_hits(nodes, x):
     for k in sorted(nodes, key=nodes.get, reverse=True)[:x]:
         yield (round(nodes[k], 5), k)
 
-def main(repo_path, count=10):
+def main(repo_path, count, limit, bare=False):
     """List most "important" files in a git repo.
 
     Implements Aron Lurie's method, see details at:
@@ -40,8 +45,7 @@ def main(repo_path, count=10):
 
     s = start("counting togetherness")
     togetherness = Counter()
-    for related_files in iter_files_per_commit(repo):
-        #print("related files: ", related_files)
+    for related_files in iter_files_per_commit(repo, limit):
         for edge in combinations(related_files, 2):
             togetherness[edge] += 1
     finish(s)
@@ -57,14 +61,19 @@ def main(repo_path, count=10):
     finish(s)
 
     for hit in _top_x_hits(nodes, count):
-        print("%s\t%s" % hit)
+        if bare:
+            print("%s" % hit[1])
+        else:
+            print("%s\t%s" % hit)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument("-v", "--verbose", action="store_true", help="Show timings")
-    parser.add_argument("-c", "--count", default=10, type=int, metavar='N', help="Maximum files to return")
+    parser.add_argument("-n", "--num-results", default=12, type=int, metavar='N', help="Return only top N results")
+    parser.add_argument("-c", "--commits", default=None, type=int, metavar='N', help="Max number of commits to traverse")
+    parser.add_argument("-b", "--bare", action="store_true", help="Return sorted filenames (without scores)")
     parser.add_argument("repo", help="Path to target repository")
     args = parser.parse_args()
     verbose = args.verbose
-    main(args.repo, args.count)
+    main(args.repo, count=args.num_results, limit=args.commits, bare=args.bare)
 

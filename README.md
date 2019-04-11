@@ -23,3 +23,27 @@ $ pipenv run python codesort.py /path/to/repository
 ```
 
 The output is in format `score<TAB>filepath` per line where `score` is the betweenness centrality score, sorted descending by score.
+
+## advanced usage
+
+See `codesort.py -h` for all options.
+
+For example, show timings and limit number of commits to last 100 from HEAD of kubernetes repo:
+```
+$ python codesort.py ~/repos/kubernetes/ -v -c 100
+counting togetherness...ok (3.1s)
+building networkx graph...ok (0.45s)
+computing betweenness...ok (87.59s)
+0.05958 staging/src/k8s.io/apiextensions-apiserver/go.mod
+0.05456 staging/src/k8s.io/kube-aggregator/go.mod
+0.01911 go.mod
+0.01911 go.sum
+0.01911 vendor/modules.txt
+0.01416 staging/src/k8s.io/sample-apiserver/go.mod
+0.01363 staging/src/k8s.io/apiextensions-apiserver/go.sum
+0.01244 staging/src/k8s.io/kube-aggregator/go.sum
+0.01244 staging/src/k8s.io/sample-apiserver/go.sum
+0.00936 staging/src/k8s.io/metrics/go.mod
+0.00936 staging/src/k8s.io/node-api/go.mod
+0.00936 staging/src/k8s.io/sample-controller/go.mod
+```
