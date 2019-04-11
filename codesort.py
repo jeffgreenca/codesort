@@ -2,7 +2,7 @@ from git import Repo
 from collections import Counter
 from itertools import combinations
 from pprint import pprint
-import networkx
+from graph_tool.all import *
 import argparse
 import time
 
@@ -37,23 +37,35 @@ def main(repo_path, count=10):
     """
     repo = Repo(repo_path)
 
+    file_to_id = dict()
+    id_to_file = dict()
+
     s = start("counting togetherness")
     togetherness = Counter()
+    index = 0
     for related_files in iter_files_per_commit(repo):
         #print("related files: ", related_files)
+        for fname in related_files:
+            file_to_id[fname] = index
+            id_to_file[index] = fname
+            index += 1
         for edge in combinations(related_files, 2):
             togetherness[edge] += 1
     finish(s)
 
-    s = start("building networkx graph")
-    graph = networkx.Graph()
+    s = start("building graph-tool graph")
+    graph = Graph(directed=False)
+    e_dist = graph.new_edge_property("float")
     for e, t in togetherness.items():
-        graph.add_edge(e[0], e[1], distance=1/t)
+        edge = graph.add_edge(file_to_id[e[0]], file_to_id[e[1]])
+        e_dist[edge] = 1/t
     finish(s)
 
     s = start("computing betweenness")
-    nodes = networkx.betweenness_centrality(graph, weight='distance')
+    vprop_result, _ = graph_tool.centrality.betweenness(graph, weight=e_dist)
     finish(s)
+
+    nodes = { id_to_file[v]: vprop_result[v] for v in graph.vertices() }
 
     for hit in _top_x_hits(nodes, count):
         print("%s\t%s" % hit)
