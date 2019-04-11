@@ -35,7 +35,7 @@ def _top_x_hits(nodes, x):
     for k in sorted(nodes, key=nodes.get, reverse=True)[:x]:
         yield (round(nodes[k], 5), k)
 
-def main(repo_path, count, limit, bare=False):
+def main(repo_path, count, limit, bare=False, single=False):
     """List most "important" files in a git repo.
 
     Implements Aron Lurie's method, see details at:
@@ -56,8 +56,12 @@ def main(repo_path, count, limit, bare=False):
         graph.add_edge(e[0], e[1], distance=1/t)
     finish(s)
 
-    s = start("computing betweenness")
-    nodes = multi.betweenness_centrality_parallel(graph, weight='distance')
+    if single:
+        s = start("computing betweenness")
+        nodes = networkx.betweenness_centrality(graph, weight='distance')
+    else:
+        s = start("computing betweenness (via parallel processes)")
+        nodes = multi.betweenness_centrality_parallel(graph, weight='distance')
     finish(s)
 
     for hit in _top_x_hits(nodes, count):
@@ -72,8 +76,9 @@ if __name__ == "__main__":
     parser.add_argument("-n", "--num-results", default=12, type=int, metavar='N', help="Return only top N results")
     parser.add_argument("-c", "--commits", default=None, type=int, metavar='N', help="Max number of commits to traverse")
     parser.add_argument("-b", "--bare", action="store_true", help="Return sorted filenames (without scores)")
+    parser.add_argument("-s", "--single", action="store_true", help="Disable parallel processing of betweenness score (might be needed for very small repositories)")
     parser.add_argument("repo", help="Path to target repository")
     args = parser.parse_args()
     verbose = args.verbose
-    main(args.repo, count=args.num_results, limit=args.commits, bare=args.bare)
+    main(args.repo, count=args.num_results, limit=args.commits, bare=args.bare, single=args.single)
 
