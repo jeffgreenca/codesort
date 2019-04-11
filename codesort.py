@@ -66,8 +66,7 @@ def main(repo_path, count, limit, bare=False, single=False, export=None):
 
     if export:
         s = start("saving graph to %s" % export)
-        # TODO fix
-        # networkx.set_node_attributes(graph, 'betweenness', bb)
+        networkx.set_node_attributes(graph, values=bb, name='betweenness')
         networkx.write_graphml(graph, export)
         finish(s)
 
@@ -84,9 +83,9 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--commits", default=None, type=int, metavar='N', help="Max number of commits to traverse")
     parser.add_argument("-b", "--bare", action="store_true", help="Return sorted filenames (without scores)")
     parser.add_argument("-s", "--single", action="store_true", help="Disable parallel processing of betweenness score (might be needed for very small repositories)")
-    parser.add_argument("-o", "--output", type=str, help="Save graph in GraphML format")
+    parser.add_argument("-e", "--export", type=str, help="Save graph in GraphML format")
     parser.add_argument("repo", help="Path to target repository")
     args = parser.parse_args()
     verbose = args.verbose
-    main(args.repo, count=args.num_results, limit=args.commits, bare=args.bare, single=args.single, export=args.output)
+    main(args.repo, count=args.num_results, limit=args.commits, bare=args.bare, single=args.single, export=args.export)
 
