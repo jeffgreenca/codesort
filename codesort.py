@@ -5,6 +5,7 @@ from pprint import pprint
 import networkx
 import argparse
 import time
+import multi
 
 def iter_files_per_commit(r):
     """Iterate over lists of files per commit"""
@@ -52,7 +53,7 @@ def main(repo_path, count=10):
     finish(s)
 
     s = start("computing betweenness")
-    nodes = networkx.betweenness_centrality(graph, weight='distance')
+    nodes = multi.betweenness_centrality_parallel(graph, weight='distance')
     finish(s)
 
     for hit in _top_x_hits(nodes, count):
