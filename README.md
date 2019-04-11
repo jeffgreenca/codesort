@@ -6,7 +6,12 @@ The idea is when approaching an unknown code base, look at the highest-ranked fi
 
 ## usage
 
-With `pipenv` available:
+Via Docker container:
+```
+$ docker run -v /path/to/your/repo:/repo:ro jeffgreenca/codesort
+``` 
+
+Without Docker, with `pipenv` available:
 
 ```
 $ pipenv install
