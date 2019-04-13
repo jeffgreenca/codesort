@@ -1,5 +1,6 @@
 # parallelize from:
 # https://networkx.github.io/documentation/stable/auto_examples/advanced/plot_parallel_betweenness.html
+# modified to allow specifying edge weight attribute name
 from multiprocessing import Pool
 import itertools
 import networkx as nx
