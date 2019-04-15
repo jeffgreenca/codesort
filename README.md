@@ -1,30 +1,48 @@
 # codesort
 
-Given a git repository, determine the most "important" files in the repository, as determined by [Aron Lurie's method](http://redd.it/bb7qst).
+Given a git repository, identify the most "central" source files based on commit history.
 
-The idea is when approaching an unknown code base, look at the highest-ranked files as a starting place for understanding the system.
+When approaching an unknown code base, for example as a maintenance programmer, this provides a clue about which source files to examine first.
 
-## usage
+## summary and credits
+This follows the method described by [Aron Lurie's method](http://redd.it/bb7qst).
 
-Via Docker container:
+In short, compute [betweenness centrality](https://en.wikipedia.org/wiki/Betweenness_centrality) on a graph constructed from reading commit history.
+
+Vertices of the graph represent individual files in the repository, and edges are added between vertices (u, v) when files u and v appear in the same commit.  Edge weights are assigned based on the inverse count of commits two vertices appear together (so files that are highly correlated have a low weight).
+
+## usage example
+
+### run with docker
+Mount your repository to `/repo` and run the container:
 ```
-$ docker run -v /path/to/your/repo:/repo:ro jeffgreenca/codesort
+$ docker run --rm -v /path/to/your/repo:/repo:ro jeffgreenca/codesort
+0.33939	app/file1.py
+0.2707	app/lib/__init__.py
+0.15025	tox.ini
+0.11347	Dockerfile
+...
 ``` 
 
-Without Docker, with `pipenv` available:
-
+### run with pipenv
+Setup with [pipenv](https://pipenv.readthedocs.io/en/latest/):
 ```
 $ pipenv install
+```
+
+Provide full path to your repository:
+```
 $ pipenv run python codesort.py /path/to/repository
 0.33939	app/file1.py
 0.2707	app/lib/__init__.py
 0.15025	tox.ini
 0.11347	Dockerfile
+...
 ```
 
 The output is in format `score<TAB>filepath` per line where `score` is the betweenness centrality score, sorted descending by score.
 
-## advanced usage
+## advanced usage example
 
 See `codesort.py -h` for all options.
 
