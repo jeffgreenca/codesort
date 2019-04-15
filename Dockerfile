@@ -4,4 +4,4 @@ WORKDIR /app
 ADD . .
 RUN pipenv install
 ENTRYPOINT ["pipenv", "run", "python", "codesort.py"]
-CMD ["/repo", "-c 12"]
+CMD ["/repo"]
