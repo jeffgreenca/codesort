@@ -31,11 +31,15 @@ def finish(s):
     if verbose:
         print("ok (%ss)" % round(time.time() - s, 2), flush=True)
 
-def _top_x_hits(bb, x):
+def _top_x_hits(bb, x, raw=False):
+    total = sum(bb.values())
     for k in sorted(bb, key=bb.get, reverse=True)[:x]:
-        yield (round(bb[k], 5), k)
+        if raw:
+            yield (round(bb[k], 6), k)
+        else:
+            yield ("%5.1f%%" % (bb[k] * 100 / total), k)
 
-def main(repo_path, count, limit, bare=False, single=False, export=None):
+def main(repo_path, count, limit, bare=False, single=False, export=None, show_raw_scores=False):
     """List most "important" files in a git repo.
 
     Implements Aron Lurie's method, see details at:
@@ -60,6 +64,7 @@ def main(repo_path, count, limit, bare=False, single=False, export=None):
         s = start("computing betweenness")
         bb = networkx.betweenness_centrality(graph, weight='distance')
     else:
+        #TODO if erro IndexError: list index out of range fallback
         s = start("computing betweenness (via parallel processes)")
         bb = multi.betweenness_centrality_parallel(graph, weight='distance')
     finish(s)
@@ -70,7 +75,7 @@ def main(repo_path, count, limit, bare=False, single=False, export=None):
         networkx.write_graphml(graph, export)
         finish(s)
 
-    for hit in _top_x_hits(bb, count):
+    for hit in _top_x_hits(bb, count, show_raw_scores):
         if bare:
             print("%s" % hit[1])
         else:
@@ -84,8 +89,9 @@ if __name__ == "__main__":
     parser.add_argument("-b", "--bare", action="store_true", help="Return sorted filenames (without scores)")
     parser.add_argument("-s", "--single", action="store_true", help="Disable parallel processing of betweenness score (might be needed for very small repositories)")
     parser.add_argument("-e", "--export", type=str, help="Save graph in GraphML format")
+    parser.add_argument("-r", "--raw", action="store_true", help="Show raw scores (instead of percentage rank)")
     parser.add_argument("repo", help="Path to target repository")
     args = parser.parse_args()
     verbose = args.verbose
-    main(args.repo, count=args.num_results, limit=args.commits, bare=args.bare, single=args.single, export=args.export)
+    main(args.repo, count=args.num_results, limit=args.commits, bare=args.bare, single=args.single, export=args.export, show_raw_scores=args.raw)
 
