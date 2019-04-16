@@ -2,66 +2,71 @@
 
 Given a git repository, identify the most "central" source files based on commit history.
 
+```
+$ docker run --rm -v /path/to/your/repo:/repo:ro jeffgreenca/codesort:latest
+```
+
 When approaching an unknown code base, for example as a maintenance programmer, this provides a clue about which source files to examine first.
 
 ## summary and credits
-This follows the method described by [Aron Lurie's method](http://redd.it/bb7qst).
+This follows [Aron Lurie's method](http://redd.it/bb7qst).  In short, compute [betweenness centrality](https://en.wikipedia.org/wiki/Betweenness_centrality) on a graph constructed from reading commit history.
 
-In short, compute [betweenness centrality](https://en.wikipedia.org/wiki/Betweenness_centrality) on a graph constructed from reading commit history.
-
-Vertices of the graph represent individual files in the repository, and edges are added between vertices (u, v) when files u and v appear in the same commit.  Edge weights are assigned based on the inverse count of commits two vertices appear together (so files that are highly correlated have a low weight).
-
+Vertices of the graph represent individual files in the repository, and edges are added between vertices (u, v) when files u and v appear in the same commit.  Edge weights are assigned based on the inverse count of commits wherein the two vertices appear together (so, files that are highly correlated have a low edge weight).
+ 
 ## usage example
 
 ### run with docker
 Mount your repository to `/repo` and run the container:
 ```
 $ docker run --rm -v /path/to/your/repo:/repo:ro jeffgreenca/codesort
-0.33939	app/file1.py
-0.2707	app/lib/__init__.py
-0.15025	tox.ini
-0.11347	Dockerfile
+25.00%	app/file1.py
+ 8.00%	app/lib/__init__.py
+ 4.00%	tox.ini
+ 2.00%	Dockerfile
 ...
 ``` 
 
 ### run with pipenv
-Setup with [pipenv](https://pipenv.readthedocs.io/en/latest/):
+Requires [pipenv](https://pipenv.readthedocs.io/en/latest/).  Setup:
 ```
-$ pipenv install
+$ git clone https://github.com/jeffgreenca/codesort.git
+$ cd codesort && pipenv install
 ```
 
-Provide full path to your repository:
+Run with path to your repository:
 ```
 $ pipenv run python codesort.py /path/to/repository
-0.33939	app/file1.py
-0.2707	app/lib/__init__.py
-0.15025	tox.ini
-0.11347	Dockerfile
+25.00%	app/file1.py
+ 8.00%	app/lib/__init__.py
+ 4.00%	tox.ini
+ 2.00%	Dockerfile
 ...
 ```
 
-The output is in format `score<TAB>filepath` per line where `score` is the betweenness centrality score, sorted descending by score.
+The output is in format `score<TAB>filepath` per line where `score` is the ranking of betweenness centrality score, descending.
 
-## advanced usage example
+## advanced usage
 
-See `codesort.py -h` for all options.
-
-For example, show timings and limit number of commits to last 100 from HEAD of kubernetes repo:
 ```
-$ python codesort.py ~/repos/kubernetes/ -v -c 100
-counting togetherness...ok (3.1s)
-building networkx graph...ok (0.45s)
-computing betweenness...ok (87.59s)
-0.05958 staging/src/k8s.io/apiextensions-apiserver/go.mod
-0.05456 staging/src/k8s.io/kube-aggregator/go.mod
-0.01911 go.mod
-0.01911 go.sum
-0.01911 vendor/modules.txt
-0.01416 staging/src/k8s.io/sample-apiserver/go.mod
-0.01363 staging/src/k8s.io/apiextensions-apiserver/go.sum
-0.01244 staging/src/k8s.io/kube-aggregator/go.sum
-0.01244 staging/src/k8s.io/sample-apiserver/go.sum
-0.00936 staging/src/k8s.io/metrics/go.mod
-0.00936 staging/src/k8s.io/node-api/go.mod
-0.00936 staging/src/k8s.io/sample-controller/go.mod
+$ ./codesort.py -h
+usage: codesort.py [-h] [-v] [-n N] [-c N] [-b] [-s] [-e EXPORT] [-r] repo
+
+List most "important" files in a git repo. Implements Aron Lurie's method, see
+details at: http://redd.it/bb7qst
+
+positional arguments:
+  repo                  Path to target repository
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v, --verbose         Show timings
+  -n N, --num-results N
+                        Return only top N results
+  -c N, --commits N     Max number of commits to traverse
+  -b, --bare            Return sorted filenames (without scores)
+  -s, --single          Disable parallel processing of betweenness score
+                        (might be needed for very small repositories)
+  -e EXPORT, --export EXPORT
+                        Save graph in GraphML format
+  -r, --raw             Show raw scores (instead of percentage rank)
 ```
