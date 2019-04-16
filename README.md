@@ -8,6 +8,9 @@ $ docker run --rm -v /path/to/your/repo:/repo:ro jeffgreenca/codesort:latest
 
 When approaching an unknown code base, for example as a maintenance programmer, this provides a clue about which source files to examine first.
 
+![annotated graph via Cytoscape](graph.png)
+> Example graph rendered via [Cytoscape](https://cytoscape.org/) from codesort output
+
 ## summary and credits
 This follows [Aron Lurie's method](http://redd.it/bb7qst).  In short, compute [betweenness centrality](https://en.wikipedia.org/wiki/Betweenness_centrality) on a graph constructed from reading commit history.
 
