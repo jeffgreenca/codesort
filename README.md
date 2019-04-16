@@ -70,3 +70,11 @@ optional arguments:
                         Save graph in GraphML format
   -r, --raw             Show raw scores (instead of percentage rank)
 ```
+
+## contributing
+
+Contributions welcome - bug reports, feature requests, pull requests.
+
+## code of conduct
+
+Be kind.
