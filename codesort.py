@@ -8,11 +8,10 @@ import time
 import multi
 
 
-
 def iter_files_per_commit(r, limit=None):
     """Iterate over lists of files per commit, by calling git log"""
     sep = "<|>"
-    kwargs = { "name_only": True, "format": "format:%s" % sep }
+    kwargs = {"name_only": True, "format": "format:%s" % sep}
     if limit:
         args["max_count"] = limit
     log = r.git.log(**kwargs)
@@ -20,6 +19,7 @@ def iter_files_per_commit(r, limit=None):
         files = [f.strip() for f in commit.split("\n") if f.strip()]
         if files:
             yield files
+
 
 def start(x):
     if verbose:
@@ -123,7 +123,9 @@ if __name__ == "__main__":
         action="store_true",
         help="Disable parallel processing of betweenness score (might be needed for very small repositories)",
     )
-    parser.add_argument("-e", "--export", type=str, metavar="FILE", help="Save graph in GraphML format")
+    parser.add_argument(
+        "-e", "--export", type=str, metavar="FILE", help="Save graph in GraphML format"
+    )
     parser.add_argument(
         "-r",
         "--raw",
