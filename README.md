@@ -52,10 +52,10 @@ The output is in format `score<TAB>filepath` per line where `score` is the ranki
 
 ```
 $ ./codesort.py -h
-usage: codesort.py [-h] [-v] [-n N] [-c N] [-b] [-s] [-e EXPORT] [-r] repo
+usage: codesort.py [-h] [-v] [-n N] [-c N] [-b] [-s] [-e FILE] [-r] repo
 
 List most "important" files in a git repo. Implements Aron Lurie's method, see
-details at: http://redd.it/bb7qst
+details at: https://bit.ly/2v6M3X0
 
 positional arguments:
   repo                  Path to target repository
@@ -69,14 +69,14 @@ optional arguments:
   -b, --bare            Return sorted filenames (without scores)
   -s, --single          Disable parallel processing of betweenness score
                         (might be needed for very small repositories)
-  -e EXPORT, --export EXPORT
+  -e FILE, --export FILE
                         Save graph in GraphML format
   -r, --raw             Show raw scores (instead of percentage rank)
 ```
 
 ## contributing
 
-Contributions welcome - bug reports, feature requests, pull requests.
+Contributions welcome - bug reports, unit tests, feature requests, pull requests.
 
 ## code of conduct
 
