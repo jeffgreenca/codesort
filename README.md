@@ -12,7 +12,7 @@ When approaching an unknown code base, for example as a maintenance programmer, 
 > Example graph rendered via [Cytoscape](https://cytoscape.org/) from codesort output
 
 ## summary and credits
-This follows [Aron Lurie's method](http://redd.it/bb7qst).  In short, compute [betweenness centrality](https://en.wikipedia.org/wiki/Betweenness_centrality) on a graph constructed from reading commit history.
+This follows [Aron Lurie's method @medium](https://medium.com/@a.lurie_78598/using-graph-theory-to-decide-where-to-start-reading-source-code-74a1e2ddf72).  In short, compute [betweenness centrality](https://en.wikipedia.org/wiki/Betweenness_centrality) on a graph constructed from reading commit history.
 
 Vertices of the graph represent individual files in the repository, and edges are added between vertices (u, v) when files u and v appear in the same commit.  Edge weights are assigned based on the inverse count of commits wherein the two vertices appear together (so, files that are highly correlated have a low edge weight).
  
