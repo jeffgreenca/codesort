@@ -8,20 +8,18 @@ import time
 import multi
 
 
+
 def iter_files_per_commit(r, limit=None):
-    """Iterate over lists of files per commit"""
-
-    # TODO include all branches?
-    count = 0
-    for commit in r.iter_commits():
-        count += 1
-        if limit is not None and count > limit:
-            return
-        if not commit.parents:
-            return
-        file_list = r.git.diff("%s~1..%s" % (commit, commit), name_only=True)
-        yield file_list.split("\n")
-
+    """Iterate over lists of files per commit, by calling git log"""
+    sep = "<|>"
+    kwargs = { "name_only": True, "format": "format:%s" % sep }
+    if limit:
+        args["max_count"] = limit
+    log = r.git.log(**kwargs)
+    for commit in log.split(sep + "\n"):
+        files = [f.strip() for f in commit.split("\n") if f.strip()]
+        if files:
+            yield files
 
 def start(x):
     if verbose:
