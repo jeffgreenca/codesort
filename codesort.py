@@ -55,7 +55,7 @@ def main(
     """List most "important" files in a git repo.
 
     Implements Aron Lurie's method, see details at:
-        http://redd.it/bb7qst
+        https://bit.ly/2v6M3X0
     """
     repo = Repo(repo_path)
 
