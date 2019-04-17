@@ -123,7 +123,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Disable parallel processing of betweenness score (might be needed for very small repositories)",
     )
-    parser.add_argument("-e", "--export", type=str, help="Save graph in GraphML format")
+    parser.add_argument("-e", "--export", type=str, metavar="FILE", help="Save graph in GraphML format")
     parser.add_argument(
         "-r",
         "--raw",
