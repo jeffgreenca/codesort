@@ -2,7 +2,7 @@ from git import Repo
 from collections import Counter
 from itertools import combinations
 from pprint import pprint
-import networkx
+import networkit
 import argparse
 import time
 import multi
@@ -59,37 +59,58 @@ def main(
 
     s = start("counting togetherness")
     togetherness = Counter()
+    file_to_id = dict()
+    i = 0
     for related_files in iter_files_per_commit(repo, limit):
-        for edge in combinations(related_files, 2):
+        related_files_by_id = []
+        for f in related_files:
+            try:
+                related_files_by_id.append(file_to_id[f])
+            except KeyError:
+                related_files_by_id.append(i)
+                file_to_id[f] = i
+                i += 1
+        for edge in combinations(related_files_by_id, 2):
             togetherness[edge] += 1
     finish(s)
 
-    s = start("building networkx graph")
-    graph = networkx.Graph()
+    s = start("building networkit graph")
+    graph = networkit.graph.Graph(weighted=True)
+    for i in range(len(file_to_id)):
+        graph.addNode()
+
     for e, t in togetherness.items():
-        graph.add_edge(e[0], e[1], distance=1 / t)
+        graph.addEdge(e[0], e[1], 1 / t)
     finish(s)
 
-    if single:
-        s = start("computing betweenness")
-        bb = networkx.betweenness_centrality(graph, weight="distance")
-    else:
-        # TODO if erro IndexError: list index out of range fallback
-        s = start("computing betweenness (via parallel processes)")
-        bb = multi.betweenness_centrality_parallel(graph, weight="distance")
+    s = start("computing betweenness")
+    # accurate, slow calculation
+    b = networkit.centrality.Betweenness(graph, normalized=True)
+    # faster but not as precise (10x better in a benchmark test)
+    b = networkit.centrality.EstimateBetweenness(graph, 128, normalized=True, parallel=True)
+    b.run()
+    bb = b.ranking()
     finish(s)
 
     if export:
-        s = start("saving graph to %s" % export)
-        networkx.set_node_attributes(graph, values=bb, name="betweenness")
-        networkx.write_graphml(graph, export)
-        finish(s)
+        raise NotImplemented("Not available for networkit (yet)")
+    # TODO implement networkit based export 
+    #      consider need for node id to filename conversion
+    #    s = start("saving graph to %s" % export)
+    #    networkx.set_node_attributes(graph, values=bb, name="betweenness")
+    #    networkx.write_graphml(graph, export)
+    #    finish(s)
 
-    for hit in _top_x_hits(bb, count, show_raw_scores):
-        if bare:
-            print("%s" % hit[1])
-        else:
-            print("%s\t%s" % hit)
+    # TODO implement _top_x_hits for bb's [(n, score),...] output
+    # also, transform node names to filenames
+    for node, score in bb:
+        print("%s\t%s" % (node, score))
+
+    #for hit in _top_x_hits(bb, count, show_raw_scores):
+    #    if bare:
+    #        print("%s" % hit[1])
+    #    else:
+    #        print("%s\t%s" % hit)
 
 
 if __name__ == "__main__":
