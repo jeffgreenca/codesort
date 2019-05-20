@@ -1,7 +1,13 @@
-FROM python:3.6
-RUN pip install pipenv
+FROM python:3.6-stretch
+RUN apt-get update && apt-get install -y \
+        cmake \
+        build-essential \
+        python3-tk \
+    && rm -rf /var/lib/apt/lists/*
+RUN pip install \
+        gitpython==2.1.11 \
+        networkit==5.0
 WORKDIR /app
-ADD . .
-RUN pipenv install
-ENTRYPOINT ["pipenv", "run", "python", "codesort.py"]
-CMD ["/repo"]
+COPY *.py .
+ENTRYPOINT ["python"]
+CMD ["validate-nk-install.py"]
