@@ -8,6 +8,6 @@ RUN pip install \
         gitpython==2.1.11 \
         networkit==5.0
 WORKDIR /app
-COPY *.py .
+COPY *.py ./
 ENTRYPOINT ["python"]
 CMD ["validate-nk-install.py"]
