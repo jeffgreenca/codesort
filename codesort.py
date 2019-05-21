@@ -32,14 +32,22 @@ def finish(s):
         print("ok (%ss)" % round(time.time() - s, 2), flush=True)
 
 
-def _top_x_hits(bb, x, raw=False):
-    total = sum(bb.values())
-    for k in sorted(bb, key=bb.get, reverse=True)[:x]:
-        if raw:
-            yield (round(bb[k], 6), k)
-        else:
-            yield ("%5.1f%%" % (bb[k] * 100 / total), k)
+#def _top_x_hits(bb, x, raw=False):
+#    total = sum(bb.values())
+#    for k in sorted(bb, key=bb.get, reverse=True)[:x]:
+#        if raw:
+#            yield (round(bb[k], 6), k)
+#        else:
+#            yield ("%5.1f%%" % (bb[k] * 100 / total), k)
 
+def _top_x_hits(bb, x, raw=False):
+    if not raw:
+        total = sum((score for _, score in bb))
+    for node, score in sorted(bb, key=lambda x: x[1], reverse=True)[:x]:
+        if raw:
+            yield (round(score, 6), node)
+        else:
+            yield ("%5.1f%%" % (score * 100 / total), node)
 
 def main(
     repo_path,
@@ -60,6 +68,7 @@ def main(
     s = start("counting togetherness")
     togetherness = Counter()
     file_to_id = dict()
+    id_to_file = dict()
     i = 0
     for related_files in iter_files_per_commit(repo, limit):
         related_files_by_id = []
@@ -69,6 +78,7 @@ def main(
             except KeyError:
                 related_files_by_id.append(i)
                 file_to_id[f] = i
+                id_to_file[i] = f
                 i += 1
         for edge in combinations(related_files_by_id, 2):
             togetherness[edge] += 1
@@ -87,13 +97,13 @@ def main(
     # accurate, slow calculation
     b = networkit.centrality.Betweenness(graph, normalized=True)
     # faster but not as precise (10x better in a benchmark test)
-    b = networkit.centrality.EstimateBetweenness(graph, 128, normalized=True, parallel=True)
+    # b = networkit.centrality.EstimateBetweenness(graph, 128, normalized=True, parallel=True)
     b.run()
     bb = b.ranking()
     finish(s)
 
     if export:
-        raise NotImplemented("Not available for networkit (yet)")
+        raise NotImplemented("Not implemented for networkit")
     # TODO implement networkit based export 
     #      consider need for node id to filename conversion
     #    s = start("saving graph to %s" % export)
@@ -101,19 +111,15 @@ def main(
     #    networkx.write_graphml(graph, export)
     #    finish(s)
 
-    # TODO implement _top_x_hits for bb's [(n, score),...] output
-    # also, transform node names to filenames
-    for node, score in bb:
-        print("%s\t%s" % (node, score))
-
-    #for hit in _top_x_hits(bb, count, show_raw_scores):
-    #    if bare:
-    #        print("%s" % hit[1])
-    #    else:
-    #        print("%s\t%s" % hit)
+    for hit in _top_x_hits(bb, count, show_raw_scores):
+        if bare:
+            print(f"{id_to_file[hit[1]]}")
+        else:
+            print(f"{hit[0]}\t{id_to_file[hit[1]]}")
 
 
 if __name__ == "__main__":
+    # TODO - update this for networkit supported features
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument("-v", "--verbose", action="store_true", help="Show timings")
     parser.add_argument(

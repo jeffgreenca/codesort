@@ -9,5 +9,4 @@ RUN pip install \
         networkit==5.0
 WORKDIR /app
 COPY *.py ./
-ENTRYPOINT ["python"]
-CMD ["validate-nk-install.py"]
+ENTRYPOINT ["python", "codesort.py", "/repo"]
