@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+# codesort.py - jeffgreenca 2019
 from git import Repo
 
 from collections import Counter
@@ -99,6 +101,7 @@ def main(
     s = start("computing betweenness")
     # accurate, slow calculation
     b = centrality.Betweenness(g, normalized=True)
+    # TODO - maybe allow toggling between accurate and estimate methods
     # faster but not as precise (10x better in a benchmark test)
     # b = networkit.centrality.EstimateBetweenness(g, 128, normalized=True, parallel=True)
     b.run()
@@ -106,13 +109,13 @@ def main(
     finish(s)
 
     if export:
-        raise NotImplemented("Not implemented for networkit")
-    # TODO implement networkit based export
-    #      consider need for node id to filename conversion
-    #    s = start("saving graph to %s" % export)
-    #    networkx.set_node_attributes(graph, values=bb, name="betweenness")
-    #    networkx.write_graphml(graph, export)
-    #    finish(s)
+        raise NotImplementedError("Not implemented for networkit")
+        # TODO implement networkit based export
+        #  consider need for node id to filename conversion
+        # s = start("saving graph to %s" % export)
+        # networkx.set_node_attributes(graph, values=bb, name="betweenness")
+        # networkx.write_graphml(graph, export)
+        # finish(s)
 
     for hit in _top_x_hits(bb, count, show_raw_scores):
         if bare:
@@ -122,13 +125,12 @@ def main(
 
 
 if __name__ == "__main__":
-    # TODO - update this for networkit supported features
     parser = argparse.ArgumentParser(description=main.__doc__)
     parser.add_argument("-v", "--verbose", action="store_true", help="Show timings")
     parser.add_argument(
         "-n",
         "--num-results",
-        default=12,
+        default=24,
         type=int,
         metavar="N",
         help="Return only top N results",
@@ -147,20 +149,15 @@ if __name__ == "__main__":
         action="store_true",
         help="Return sorted filenames (without scores)",
     )
-    parser.add_argument(
-        "-s",
-        "--single",
-        action="store_true",
-        help="Disable parallel processing of betweenness score (might be needed for very small repositories)",
-    )
-    parser.add_argument(
-        "-e", "--export", type=str, metavar="FILE", help="Save graph in GraphML format"
-    )
+    # TODO implement networkit based export
+    # parser.add_argument(
+    #    "-e", "--export", type=str, metavar="FILE", help="Save graph in GraphML format"
+    # )
     parser.add_argument(
         "-r",
         "--raw",
         action="store_true",
-        help="Show raw scores (instead of percentage rank)",
+        help="Show raw scores (default is percentage rank)",
     )
     parser.add_argument("repo", help="Path to target repository")
     args = parser.parse_args()
