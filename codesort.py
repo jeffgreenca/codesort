@@ -10,9 +10,11 @@ import time
 # TODO fix after patch to networkit lands switching to system warnings lib
 import io
 from contextlib import redirect_stdout
+
 null = io.StringIO()
 with redirect_stdout(null):
     from networkit import graph, centrality
+
 
 def iter_files_per_commit(r, limit=None):
     """Iterate over lists of files per commit, by calling git log"""
@@ -48,6 +50,7 @@ def _top_x_hits(bb, x, raw=False):
             yield ("%8.6f" % round(score, 6), node)
         else:
             yield ("%5.1f%%" % (score * 100 / total), node)
+
 
 def main(
     repo_path,
@@ -104,7 +107,7 @@ def main(
 
     if export:
         raise NotImplemented("Not implemented for networkit")
-    # TODO implement networkit based export 
+    # TODO implement networkit based export
     #      consider need for node id to filename conversion
     #    s = start("saving graph to %s" % export)
     #    networkx.set_node_attributes(graph, values=bb, name="betweenness")
