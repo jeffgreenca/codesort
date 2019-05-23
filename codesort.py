@@ -1,12 +1,18 @@
 from git import Repo
+
 from collections import Counter
 from itertools import combinations
-from pprint import pprint
-import networkit
 import argparse
 import time
-import multi
 
+# Temporary hack to suppress networkit stdout "warnings"
+# thanks https://codingdose.info/2018/03/22/supress-print-output-in-python/
+# TODO fix after patch to networkit lands switching to system warnings lib
+import io
+from contextlib import redirect_stdout
+null = io.StringIO()
+with redirect_stdout(null):
+    from networkit import graph, centrality
 
 def iter_files_per_commit(r, limit=None):
     """Iterate over lists of files per commit, by calling git log"""
@@ -21,6 +27,7 @@ def iter_files_per_commit(r, limit=None):
             yield files
 
 
+# verbose display of runtime durations
 def start(x):
     if verbose:
         print("%s..." % x, end="", flush=True)
@@ -32,20 +39,13 @@ def finish(s):
         print("ok (%ss)" % round(time.time() - s, 2), flush=True)
 
 
-#def _top_x_hits(bb, x, raw=False):
-#    total = sum(bb.values())
-#    for k in sorted(bb, key=bb.get, reverse=True)[:x]:
-#        if raw:
-#            yield (round(bb[k], 6), k)
-#        else:
-#            yield ("%5.1f%%" % (bb[k] * 100 / total), k)
-
 def _top_x_hits(bb, x, raw=False):
+    """Return nicely formatted list of scores by file"""
     if not raw:
         total = sum((score for _, score in bb))
     for node, score in sorted(bb, key=lambda x: x[1], reverse=True)[:x]:
         if raw:
-            yield (round(score, 6), node)
+            yield ("%8.6f" % round(score, 6), node)
         else:
             yield ("%5.1f%%" % (score * 100 / total), node)
 
@@ -85,19 +85,19 @@ def main(
     finish(s)
 
     s = start("building networkit graph")
-    graph = networkit.graph.Graph(weighted=True)
+    g = graph.Graph(weighted=True)
     for i in range(len(file_to_id)):
-        graph.addNode()
+        g.addNode()
 
     for e, t in togetherness.items():
-        graph.addEdge(e[0], e[1], 1 / t)
+        g.addEdge(e[0], e[1], 1 / t)
     finish(s)
 
     s = start("computing betweenness")
     # accurate, slow calculation
-    b = networkit.centrality.Betweenness(graph, normalized=True)
+    b = centrality.Betweenness(g, normalized=True)
     # faster but not as precise (10x better in a benchmark test)
-    # b = networkit.centrality.EstimateBetweenness(graph, 128, normalized=True, parallel=True)
+    # b = networkit.centrality.EstimateBetweenness(g, 128, normalized=True, parallel=True)
     b.run()
     bb = b.ranking()
     finish(s)
