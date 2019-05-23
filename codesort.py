@@ -167,7 +167,6 @@ if __name__ == "__main__":
         count=args.num_results,
         limit=args.commits,
         bare=args.bare,
-        single=args.single,
-        export=args.export,
+        export=False,
         show_raw_scores=args.raw,
     )
