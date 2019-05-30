@@ -4,7 +4,8 @@ Given a git repository, identify the most "central" source files based on
 commit history.
 
 ```
-$ docker run --rm -v /path/to/your/repo:/repo:ro jeffgreenca/codesort:latest
+$ cd /path/to/your/repo
+$ docker run --rm -v "$PWD":/repo:ro jeffgreenca/codesort
 ```
 
 When approaching an unknown code base, for example as a maintenance programmer,
