@@ -1,3 +1,5 @@
+# codesort - https://github.com/jeffgreenca/codesort
+
 # build networkit
 FROM python:3.6-stretch as builder
 RUN apt-get update && apt-get install -y \
@@ -10,6 +12,7 @@ RUN pip install \
 
 # codesort image
 FROM python:3.6-stretch
+LABEL maintainer="jeff.green.ca@gmail.com"
 COPY --from=builder /usr/local/lib/python3.6 /usr/local/lib/python3.6
 WORKDIR /app
 COPY codesort.py .
