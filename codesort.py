@@ -23,7 +23,7 @@ def iter_files_per_commit(r, limit=None):
     sep = "<|>"
     kwargs = {"name_only": True, "format": "format:%s" % sep}
     if limit:
-        args["max_count"] = limit
+        kwargs["max_count"] = limit
     log = r.git.log(**kwargs)
     for commit in log.split(sep + "\n"):
         files = [f.strip() for f in commit.split("\n") if f.strip()]
