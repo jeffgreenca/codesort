@@ -48,7 +48,10 @@ of betweenness centrality score, descending.
 
 ```
 $ docker run --rm jeffgreenca/codesort --help
-usage: codesort.py [-h] [-v] [-n N] [-c N] [-b] [-r] repo
+
+usage: codesort.py [-h] [-v] [-n N] [-c N] [-b] [-r] [--include INCLUDE]
+                   [--exclude EXCLUDE]
+                   repo
 
 List most "important" files in a git repo. Implements Aron Lurie's method, see
 details at: https://bit.ly/2v6M3X0
@@ -64,9 +67,41 @@ optional arguments:
   -c N, --commits N     Max number of commits to traverse
   -b, --bare            Return sorted filenames (without scores)
   -r, --raw             Show raw scores (default is percentage rank)
+  --include INCLUDE     Include files in repo matching glob pattern(s) (comma
+                        separated)
+  --exclude EXCLUDE     Exclude files in repo matching glob pattern(s) (comma
+                        separated)
 ```
 
 > NOTE: when using the docker image, arg `repo` is already specified for you.
+
+### include and exclude patterns
+
+You can select which files to include, and/or files to ignore, using standard
+glob patterns.
+
+For example, to consider only Python source files:
+```
+$ docker run ... codesort --include "*.py"
+    app.py
+    lib/app.py
+    tests/test_app.py
+```
+
+To consider only Python source files, and exclude the `tests` base folder:
+```
+$ docker run ... codesort --include "*.py" --exclude "tests/*"
+    app.py
+    lib/app.py
+```
+
+Multiple patterns are can be specified via a comma-delimited list:
+```
+$ docker run ... codesort --include "*.py,*.go,src/*"
+    app.py
+    main.go
+    src/config.yml
+```
 
 ## about `networkit`
 

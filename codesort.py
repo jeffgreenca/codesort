@@ -5,6 +5,8 @@ from git import Repo
 from collections import Counter
 from itertools import combinations
 import argparse
+import fnmatch
+import re
 import time
 
 # Temporary hack to suppress networkit stdout "warnings"
@@ -54,6 +56,25 @@ def _top_x_hits(bb, x, raw=False):
             yield ("%5.1f%%" % (score * 100 / total), node)
 
 
+def _gen_filter_files_func(include_pats, exclude_pats):
+    """Return a function that filters a list of files by glob patterns"""
+    regex_include = tuple(
+        re.compile(rx) for rx in (fnmatch.translate(p) for p in include_pats)
+    )
+    regex_exclude = tuple(
+        re.compile(rx) for rx in (fnmatch.translate(p) for p in exclude_pats)
+    )
+
+    def filter_func(files):
+        for f in files:
+            if any((r.match(f) for r in regex_exclude)):
+                continue
+            if not regex_include or any((r.match(f) for r in regex_include)):
+                yield f
+
+    return filter_func
+
+
 def main(
     repo_path,
     count,
@@ -62,6 +83,8 @@ def main(
     single=False,
     export=None,
     show_raw_scores=False,
+    include=None,
+    exclude=None,
 ):
     """List most "important" files in a git repo.
 
@@ -70,6 +93,10 @@ def main(
     """
     repo = Repo(repo_path)
 
+    include_pats = include.split(",") if include else []
+    exclude_pats = exclude.split(",") if exclude else []
+    filter_files = _gen_filter_files_func(include_pats, exclude_pats)
+
     s = start("counting togetherness")
     togetherness = Counter()
     file_to_id = dict()
@@ -77,7 +104,7 @@ def main(
     i = 0
     for related_files in iter_files_per_commit(repo, limit):
         related_files_by_id = []
-        for f in related_files:
+        for f in filter_files(related_files):
             try:
                 related_files_by_id.append(file_to_id[f])
             except KeyError:
@@ -159,6 +186,14 @@ if __name__ == "__main__":
         action="store_true",
         help="Show raw scores (default is percentage rank)",
     )
+    parser.add_argument(
+        "--include",
+        help="Include files in repo matching glob pattern(s) (comma separated)",
+    )
+    parser.add_argument(
+        "--exclude",
+        help="Exclude files in repo matching glob pattern(s) (comma separated)",
+    )
     parser.add_argument("repo", help="Path to target repository")
     args = parser.parse_args()
     verbose = args.verbose
@@ -169,4 +204,6 @@ if __name__ == "__main__":
         bare=args.bare,
         export=False,
         show_raw_scores=args.raw,
+        include=args.include,
+        exclude=args.exclude,
     )
