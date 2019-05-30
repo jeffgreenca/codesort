@@ -1,3 +1,5 @@
+![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/jeffgreenca/codesort.svg?style=for-the-badge) ![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/jeffgreenca/codesort.svg?style=for-the-badge)
+
 # codesort
 
 Given a git repository, identify the most "central" source files based on
