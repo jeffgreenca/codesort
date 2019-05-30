@@ -1,4 +1,4 @@
-![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/jeffgreenca/codesort.svg?style=for-the-badge) ![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/jeffgreenca/codesort.svg?style=for-the-badge)
+[![Build Status](https://travis-ci.org/jeffgreenca/codesort.svg?branch=master)](https://travis-ci.org/jeffgreenca/codesort) ![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/jeffgreenca/codesort.svg?style=for-the-badge) ![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/jeffgreenca/codesort.svg?style=for-the-badge)
 
 # codesort
 
